@@ -90,6 +90,7 @@ RUN pecl install xdebug \
 #COPY --from=mariadb:10.6 /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
 
 COPY ./config/usr/local/bin/mysqladmin /usr/local/bin/
+COPY ./config/usr/local/bin/mhsendmail /usr/local/bin/
 
 COPY ./config/usr/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
 COPY ./config/usr/lib/libssl.so.1.1 /usr/lib/libssl.so.1.1
