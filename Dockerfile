@@ -19,7 +19,8 @@ RUN groupadd -g ${UID} ${USERNAME} \
     && echo "${USERNAME}:12345678" | chpasswd \
     && usermod -aG sudo ${USERNAME} \
     && mkdir -p ${APP_DIR} \
-    && mkdir /var/run/php-fpm
+    && mkdir /var/run/php-fpm \
+    && mkdir /docker-entrypoint-initphp.d
 
 # Prepare for installation of libraries
 RUN apt-get update \
@@ -81,6 +82,18 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     xsl \
     zip
 
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+#COPY --from=mariadb:10.6 /usr/bin/mysqladmin /usr/local/bin/mysqladmin
+#COPY --from=mariadb:10.6 /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/libssl.so.1.1
+#COPY --from=mariadb:10.6 /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
+
+COPY ./config/usr/local/bin/mysqladmin /usr/local/bin/
+
+COPY ./config/usr/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
+COPY ./config/usr/lib/libssl.so.1.1 /usr/lib/libssl.so.1.1
+
 # Install composer
 RUN curl -fsSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
@@ -119,4 +132,4 @@ COPY ./config/scripts/usr/local/bin/docker-entrypoint /usr/local/bin/
 
 WORKDIR ${APP_DIR}
 
-ENTRYPOINT ["php-fpm"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
